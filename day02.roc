@@ -9,7 +9,7 @@ unwrap = \result ->
         Ok x -> x
         Err _ -> crash "unwrap failed"
 
-Game : { id: U64, dice: List {red: U64, green: U64, blue: U64} }
+Game : { id : U64, dice : List { red : U64, green : U64, blue : U64 } }
 
 parse : Str -> List Game
 parse = \input ->
@@ -18,7 +18,8 @@ parse = \input ->
     |> List.dropIf Str.isEmpty
     |> List.map \line ->
         split : List Str
-        split = line
+        split =
+            line
             |> Str.replaceEach "Game " ""
             |> Str.replaceEach " " ""
             |> Str.replaceEach "blue" "b"
@@ -26,26 +27,27 @@ parse = \input ->
             |> Str.replaceEach "green" "g"
             |> Str.split ":"
 
-        ##dbg split
+        # #dbg split
 
         id : U64
         id =
             List.first split
             |> Result.try Str.toU64
             |> unwrap
-            
-        second : Str
-        second = when (List.last split) is
-            Ok val -> val
-            Err _ -> crash "oops!@#!@"
 
-        dice : List {red: U64, green: U64, blue: U64}
+        second : Str
+        second =
+            when List.last split is
+                Ok val -> val
+                Err _ -> crash "oops!@#!@"
+
+        dice : List { red : U64, green : U64, blue : U64 }
         dice =
             second
             |> Str.split ";"
             |> List.walk [] \outerState, outerElem ->
                 Str.split outerElem ","
-                |> List.walk {red: 0, green: 0, blue: 0} \innerState, innerElem ->
+                |> List.walk { red: 0, green: 0, blue: 0 } \innerState, innerElem ->
                     if Str.endsWith innerElem "r" then
                         innerElem
                         |> Str.splitFirst "r"
@@ -53,7 +55,7 @@ parse = \input ->
                         |> .before
                         |> Str.toU64
                         |> unwrap
-                        |> \num -> {innerState & red: num}
+                        |> \num -> { innerState & red: num }
                     else if Str.endsWith innerElem "g" then
                         innerElem
                         |> Str.splitFirst "g"
@@ -61,7 +63,7 @@ parse = \input ->
                         |> .before
                         |> Str.toU64
                         |> unwrap
-                        |> \num -> {innerState & green: num}
+                        |> \num -> { innerState & green: num }
                     else if Str.endsWith innerElem "b" then
                         innerElem
                         |> Str.splitFirst "b"
@@ -69,11 +71,11 @@ parse = \input ->
                         |> .before
                         |> Str.toU64
                         |> unwrap
-                        |> \num -> {innerState & blue: num}
+                        |> \num -> { innerState & blue: num }
                     else
                         crash "string doesn't end in r, g, or b"
                 |> \val -> List.append outerState val
-        {id : id, dice: dice}
+        { id: id, dice: dice }
 
 isPossible : Game -> Bool
 isPossible = \game ->
@@ -95,11 +97,11 @@ func1 = \input ->
 power : Game -> U64
 power = \game ->
     dice = game.dice
-    d = List.walk dice {r:0, g:0, b:0} \state, elem ->
+    d = List.walk dice { r: 0, g: 0, b: 0 } \state, elem ->
         r = Num.max state.r elem.red
         g = Num.max state.g elem.green
         b = Num.max state.b elem.blue
-        {r:r, g:g, b:b}
+        { r: r, g: g, b: b }
     d.r * d.g * d.b
 
 func2 = \input ->
@@ -108,7 +110,6 @@ func2 = \input ->
     |> List.map power
     |> List.sum
     |> Num.toStr
-
 
 testInput1 = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green\nGame 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue\nGame 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red\nGame 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red\nGame 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green\n"
 testInput2 = testInput1
@@ -128,7 +129,6 @@ main =
         expect test2 == "2286"
         expect part2 == "55593"
 
-
         {} <- Task.await (Stdout.line "test1: \(test1)")
         {} <- Task.await (Stdout.line "part1: \(part1)")
         {} <- Task.await (Stdout.line "test2: \(test2)")
@@ -136,4 +136,4 @@ main =
         Stdout.write ""
 
     Task.onErr task \_ -> crash "Failed to read and parse input"
-    
+

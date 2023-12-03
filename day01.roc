@@ -12,21 +12,23 @@ func1 = \input ->
     |> parse
     |> List.map \line ->
         line
-        |> List.walk {nums: []} \state, elem ->
-            when (Str.toU64 elem) is                
+        |> List.walk { nums: [] } \state, elem ->
+            when Str.toU64 elem is
                 Ok num ->
                     { state & nums: List.append state.nums num }
+
                 Err _ ->
-                    { state & nums: state.nums }
-        ## At this point we have a list of digits so we get the first and last digits in the list
+                    { state & nums: state.nums } ## At this point we have a list of digits so we get the first and last digits in the list
         |> \state ->
-            first = when (List.first state.nums) is
-                Ok num -> num
-                Err _ -> 0
-            last = when (List.last state.nums) is
-                Ok num -> num
-                Err _ -> 0
-            10*first + last
+            first =
+                when List.first state.nums is
+                    Ok num -> num
+                    Err _ -> 0
+            last =
+                when List.last state.nums is
+                    Ok num -> num
+                    Err _ -> 0
+            10 * first + last
     |> List.sum
     |> Num.toStr
 
@@ -46,21 +48,23 @@ func2 = \input ->
         |> Str.replaceEach "eight" "e8t"
         |> Str.replaceEach "nine" "n9e"
         |> Str.graphemes
-        |> List.walk {nums: []} \state, elem ->
-            when (Str.toU64 elem) is                
+        |> List.walk { nums: [] } \state, elem ->
+            when Str.toU64 elem is
                 Ok num ->
                     { state & nums: List.append state.nums num }
+
                 Err _ ->
-                    { state & nums: state.nums }
-        ## At this point we have a list of digits so we get the first and last digits in the list
+                    { state & nums: state.nums } ## At this point we have a list of digits so we get the first and last digits in the list
         |> \state ->
-            first = when (List.first state.nums) is
-                Ok num -> num
-                Err _ -> 0
-            last = when (List.last state.nums) is
-                Ok num -> num
-                Err _ -> 0
-            10*first + last
+            first =
+                when List.first state.nums is
+                    Ok num -> num
+                    Err _ -> 0
+            last =
+                when List.last state.nums is
+                    Ok num -> num
+                    Err _ -> 0
+            10 * first + last
     |> List.sum
     |> Num.toStr
 
@@ -84,4 +88,4 @@ main =
         Stdout.write ""
 
     Task.onErr task \_ -> crash "Failed to read and parse input"
-    
+
