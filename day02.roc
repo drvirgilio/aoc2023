@@ -3,6 +3,12 @@ app "day02"
     imports [pf.Stdout, pf.Path, pf.File, pf.Task]
     provides [main] to pf
 
+unwrap : Result a * -> a
+unwrap = \result ->
+    when result is
+        Ok x -> x
+        Err _ -> crash "unwrap failed"
+
 Game : { id: U64, dice: List {red: U64, green: U64, blue: U64} }
 
 parse : Str -> List Game
@@ -26,8 +32,8 @@ parse = \input ->
         id =
             List.first split
             |> Result.try Str.toU64
-            |> Result.withDefault 0
-
+            |> unwrap
+            
         second : Str
         second = when (List.last split) is
             Ok val -> val
@@ -43,29 +49,29 @@ parse = \input ->
                     if Str.endsWith innerElem "r" then
                         innerElem
                         |> Str.splitFirst "r"
-                        |> Result.withDefault {after:"", before:""}
+                        |> unwrap
                         |> .before
                         |> Str.toU64
-                        |> Result.withDefault 0
+                        |> unwrap
                         |> \num -> {innerState & red: num}
                     else if Str.endsWith innerElem "g" then
                         innerElem
                         |> Str.splitFirst "g"
-                        |> Result.withDefault {after:"", before:""} 
+                        |> unwrap
                         |> .before
                         |> Str.toU64
-                        |> Result.withDefault 0
+                        |> unwrap
                         |> \num -> {innerState & green: num}
                     else if Str.endsWith innerElem "b" then
                         innerElem
                         |> Str.splitFirst "b"
-                        |> Result.withDefault {after:"", before:""}
+                        |> unwrap
                         |> .before
                         |> Str.toU64
-                        |> Result.withDefault 0
+                        |> unwrap
                         |> \num -> {innerState & blue: num}
                     else
-                        crash "oops5"
+                        crash "string doesn't end in r, g, or b"
                 |> \val -> List.append outerState val
         {id : id, dice: dice}
 
@@ -116,6 +122,12 @@ main =
 
         test2 = func2 testInput2
         part2 = func2 input
+
+        expect test1 == "8"
+        expect part1 == "2913"
+        expect test2 == "2286"
+        expect part2 == "55593"
+
 
         {} <- Task.await (Stdout.line "test1: \(test1)")
         {} <- Task.await (Stdout.line "part1: \(part1)")
